@@ -45,9 +45,9 @@ const Login = () => {
       fetchUser();
       navigate(`/dashboard?${longLink ? `createNew=${longLink}` : ""}`);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, data]);
 
+  //Form validation using Yup and managing errors
   const handleLogin = async () => {
     setErrors([]);
     try {
@@ -60,8 +60,10 @@ const Login = () => {
           .required("Password is required"),
       });
 
+  //{abortEarly: false} ensures that all errors are collected rather than stopping at the first error
       await schema.validate(formData, {abortEarly: false});
-      await fnLogin();
+      // login api call
+      await fnLogin(); 
     } catch (e) {
       const newErrors = {};
 

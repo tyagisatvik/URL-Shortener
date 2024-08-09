@@ -1,5 +1,6 @@
 import supabase, {supabaseUrl} from "./supabase";
 
+// this function verifies whether user exist in my database
 export async function login({email, password}) {
   const {data, error} = await supabase.auth.signInWithPassword({
     email,
