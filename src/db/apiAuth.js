@@ -12,15 +12,18 @@ export async function login({email, password}) {
   return data;
 }
 
+
+//signup api
 export async function signup({name, email, password, profile_pic}) {
   const fileName = `dp-${name.split(" ").join("-")}-${Math.random()}`;
 
-  const {error: storageError} = await supabase.storage
+  const {error: storageError} = await supabase.storage//api call to database
     .from("profile_pic")
     .upload(fileName, profile_pic);
 
   if (storageError) throw new Error(storageError.message);
 
+  //create an entry in database
   const {data, error} = await supabase.auth.signUp({
     email,
     password,
@@ -37,11 +40,13 @@ export async function signup({name, email, password, profile_pic}) {
   return data;
 }
 
+
+//fetching current user session
 export async function getCurrentUser() {
   const {data: session, error} = await supabase.auth.getSession();
   if (!session.session) return null;
 
-  // const {data, error} = await supabase.auth.getUser();
+  
 
   if (error) throw new Error(error.message);
   return session.session?.user;

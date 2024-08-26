@@ -19,11 +19,15 @@ import {BeatLoader} from "react-spinners";
 import {UrlState} from "@/context";
 import {QRCode} from "react-qrcode-logo";
 
+//React functional component used to create a new short link and associated QR code
+//This component uses various hooks, manages form state, validates input, and interacts with APIs
 export function CreateLink() {
+
+  // useRef create a reference to the QRCode component, which internally generates a canvas element
   const {user} = UrlState();
 
   const navigate = useNavigate();
-  const ref = useRef();
+  const ref = useRef();//Creates a reference to a React component or DOM element. Here, it will be used to access the QR code's canvas
 
   let [searchParams, setSearchParams] = useSearchParams();
   const longLink = searchParams.get("createNew");
@@ -35,6 +39,7 @@ export function CreateLink() {
     customUrl: "",
   });
 
+  //Defines the validation rules for the form using yup
   const schema = yup.object().shape({
     title: yup.string().required("Title is required"),
     longUrl: yup
@@ -51,6 +56,8 @@ export function CreateLink() {
     });
   };
 
+  //Custom hook useFetch is used to handle API requests and responses
+  //It returns loading, error, data, and a function fnCreateUrl to perform the createUrl API request
   const {
     loading,
     error,
@@ -58,13 +65,17 @@ export function CreateLink() {
     fn: fnCreateUrl,
   } = useFetch(createUrl, {...formValues, user_id: user.id});
 
+  //Navigates to a new route if there’s no error and data is available
+  //It uses data[0].id to construct the URL for navigation
   useEffect(() => {
     if (error === null && data) {
       navigate(`/link/${data[0].id}`);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, data]);
 
+
+//Validates the form values against the schema. Converts the QR code canvas to a Blob.
+//Calls the fnCreateUrl function to create the URL. Catches and sets validation errors if any
   const createNewLink = async () => {
     setErrors([]);
     try {
@@ -99,6 +110,8 @@ export function CreateLink() {
         <DialogHeader>
           <DialogTitle className="font-bold text-2xl">Create New</DialogTitle>
         </DialogHeader>
+
+        //this peace of code is forming qr code
         {formValues?.longUrl && (
           <QRCode ref={ref} size={250} value={formValues?.longUrl} />
         )}

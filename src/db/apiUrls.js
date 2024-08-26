@@ -14,6 +14,7 @@ export async function getUrls(user_id) {
   return data;
 }
 
+// fetch all urls related to that user
 export async function getUrl({id, user_id}) {
   const {data, error} = await supabase
     .from("urls")
@@ -30,6 +31,7 @@ export async function getUrl({id, user_id}) {
   return data;
 }
 
+
 export async function getLongUrl(id) {
   let {data: shortLinkData, error: shortLinkError} = await supabase
     .from("urls")
@@ -45,18 +47,22 @@ export async function getLongUrl(id) {
   return shortLinkData;
 }
 
-export async function createUrl({title, longUrl, customUrl, user_id}, qrcode) {
-  const short_url = Math.random().toString(36).substr(2, 6);
-  const fileName = `qr-${short_url}`;
 
+export async function createUrl({title, longUrl, customUrl, user_id}, qrcode) {
+  const short_url = Math.random().toString(36).substr(2, 6); //generating short url
+  const fileName = `qr-${short_url}`; //Constructs a file name for the QR code to be uploaded to Supabase storage
+
+  //Uses Supabase storage to upload the QR code image with the specified file name
   const {error: storageError} = await supabase.storage
     .from("qrs")
     .upload(fileName, qrcode);
 
   if (storageError) throw new Error(storageError.message);
 
-  const qr = `${supabaseUrl}/storage/v1/object/public/qrs/${fileName}`;
+  const qr = `${supabaseUrl}/storage/v1/object/public/qrs/${fileName}`; //Constructs a URL to access the uploaded QR code image using the base URL and file path
 
+
+  //Inserts a new record into the urls table with the provided data
   const {data, error} = await supabase
     .from("urls")
     .insert([

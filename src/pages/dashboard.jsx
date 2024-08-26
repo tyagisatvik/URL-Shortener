@@ -18,8 +18,12 @@ import {UrlState} from "@/context";
 
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const {user} = UrlState();
+  const {user} = UrlState(); //fetch user
+
+  // url api call
   const {loading, error, data: urls, fn: fnUrls} = useFetch(getUrls, user.id);
+
+  // clicks api call
   const {
     loading: loadingClicks,
     data: clicks,
@@ -29,10 +33,13 @@ const Dashboard = () => {
     urls?.map((url) => url.id)
   );
 
+//trigger getUrl function
+//When the component (in which this useEffect is defined) is mounted (i.e., first rendered), the useEffect hook is executed.
   useEffect(() => {
     fnUrls();
   }, []);
 
+//filtering urls according to input
   const filteredUrls = urls?.filter((url) =>
     url.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -78,6 +85,8 @@ const Dashboard = () => {
         <Filter className="absolute top-2 right-2 p-1" />
       </div>
       {error && <Error message={error?.message} />}
+      
+    {/* link card */}
       {(filteredUrls || []).map((url, i) => (
         <LinkCard key={i} url={url} fetchUrls={fnUrls} />
       ))}
