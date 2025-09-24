@@ -18,6 +18,7 @@ import {createUrl} from "@/db/apiUrls";
 import {BeatLoader} from "react-spinners";
 import {UrlState} from "@/context";
 import {QRCode} from "react-qrcode-logo";
+import {APP_BASE_URL} from "@/config";
 
 //React functional component used to create a new short link and associated QR code
 //This component uses various hooks, manages form state, validates input, and interacts with APIs
@@ -152,7 +153,7 @@ export function CreateLink() {
         />
         {errors.longUrl && <Error message={errors.longUrl} />}
         <div className="flex items-center gap-2">
-          <Card className="p-2">trimrr.in</Card> /
+          <Card className="p-2">{APP_BASE_URL.replace(/^https?:\/\//, "")}</Card> /
           <Input
             id="customUrl"
             placeholder="Custom Link (optional)"
