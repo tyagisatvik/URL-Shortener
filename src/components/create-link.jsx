@@ -77,22 +77,43 @@ export function CreateLink() {
 //Validates the form values against the schema. Converts the QR code canvas to a Blob.
 //Calls the fnCreateUrl function to create the URL. Catches and sets validation errors if any
   const createNewLink = async () => {
-    setErrors([]);
+    setErrors({});
+    if (!user || !user.id) {
+      setErrors((prev) => ({...prev, user: "User not loaded yet. Please try again in a moment."}));
+      return;
+    }
     try {
       await schema.validate(formValues, {abortEarly: false});
 
-      const canvas = ref.current.canvasRef.current;
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve));
+      const qrComp = ref.current;
+      const canvas = qrComp?.canvasRef?.current;
+      if (!canvas) {
+        setErrors((prev) => ({...prev, qrcode: "QR code not ready. Try again."}));
+        return;
+      }
+
+      const blob = await new Promise((resolve, reject) => {
+        try {
+          canvas.toBlob((b) => {
+            if (!b) reject(new Error("Failed to generate QR code image"));
+            else resolve(b);
+          });
+        } catch (err) {
+          reject(err);
+        }
+      });
 
       await fnCreateUrl(blob);
     } catch (e) {
-      const newErrors = {};
-
-      e?.inner?.forEach((err) => {
-        newErrors[err.path] = err.message;
-      });
-
-      setErrors(newErrors);
+      if (e?.inner) {
+        const newErrors = {};
+        e.inner.forEach((err) => {
+          if (err.path) newErrors[err.path] = err.message;
+        });
+        setErrors(newErrors);
+      } else {
+        setErrors((prev) => ({...prev, api: e.message}));
+      }
     }
   };
 
@@ -139,7 +160,10 @@ export function CreateLink() {
             onChange={handleChange}
           />
         </div>
-        {error && <Error message={errors.message} />}
+  {error && <Error message={error.message} />}
+  {errors.user && <Error message={errors.user} />}
+  {errors.qrcode && <Error message={errors.qrcode} />}
+  {errors.api && <Error message={errors.api} />}
         <DialogFooter className="sm:justify-start">
           <Button
             type="button"
